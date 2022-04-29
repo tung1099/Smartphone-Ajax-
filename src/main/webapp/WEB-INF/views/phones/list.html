@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="/layout :: head">
+    <meta charset="UTF-8">
+    <title>Smart phone</title>
+</head>
+<body>
+<h1>Smart phone</h1>
+<form>
+    <table>
+        <tr>
+            <td>Producer: </td>
+            <td><input type="text" id="producer" name="producer"></td>
+        </tr>
+        <tr>
+            <td>Model: </td>
+            <td><input type="text" id="model" name="model"></td>
+        </tr>
+        <tr>
+            <td>Price: </td>
+            <td><input type="text" id="price" name="price"></td>
+        </tr>
+    </table>
+    <input type="submit" th:value="Add" onclick="addSmartphone()">
+</form>
+<h2>List phone</h2>
+<table id="listSmartphone">
+        <tr>
+            <th>ID</th>
+            <th>Producer</th>
+            <th>Model</th>
+            <th>Price</th>
+            <th>Delete</th>
+<!--            <th>Update</th>-->
+        </tr>
+    <th:block th:each="s : ${smartphones}">
+        <tr>
+            <td th:text="${s.id}"></td>
+            <td th:text="${s.producer}"></td>
+            <td th:text="${s.model}"></td>
+            <td th:text="${s.price}"></td>
+            <td>
+<!--                <button class="deleteSmartphone" type="submit" th:value="${s.getId()}" onclick="deleteSmartphone(this)">Delete-->
+<!--                </button>-->
+                <a th:href="${s.getId()}" class="deleteSmartphone" onclick="deleteSmartphone(this)">Delete</a>
+            </td>
+<!--            <td>-->
+<!--                <button class="editSmartphone" type="submit" th:value="${s.getId()}" onclick="editSmartphone(this)">Edit-->
+<!--                </button>-->
+<!--            </td>-->
+        </tr>
+    </th:block>
+</table>
+
+<footer th:replace="/layout :: footer"></footer>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+    function addSmartphone(){
+        let producer = $('#producer').val();
+        let model = $('#model').val();
+        let price = $('#price').val();
+        let newSmartphone = {
+            producer: producer,
+            model: model,
+            price: price
+        }
+        let newSmartphoneJson = JSON.stringify(newSmartphone);
+
+        $.ajax({
+            headers:{
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            //method
+            type:"POST",
+            //du lieu gui len
+            data: newSmartphoneJson,
+            //ten API
+            url: "/smartphones",
+            // success: function (){
+            //     showListSmartphone();
+            // }
+            success: showListSmartphone
+
+        });
+        event.preventDefault();
+    }
+    function showListSmartphone(){
+        $.ajax({
+            type: "GET",
+            url: "/smartphones",
+
+            success: function (smartphones){
+                let content = '<tr>\n' +
+                    '        <th>Id</th>\n' +
+                    '        <th>Producer</th>\n' +
+                    '        <th>Model</th>\n' +
+                    '        <th>Price</th>\n' +
+                    '        <th>Delete</th>\n' +
+                    '    </tr>';
+                for (let i = 0; i < smartphones.length; i++) {
+                    content += `<tr>
+            <td>${smartphones[i].id}</td>
+            <td>${smartphones[i].producer}</td>
+            <td>${smartphones[i].model}</td>
+            <td>${smartphones[i].price}</td>
+            <td>
+               <a href="${smartphones[i].id}" onclick="deleteSmartphone(this)" class="deleteProvince">Delete</a>
+</td>
+        </tr>`;
+                }96
+                    document.getElementById("listSmartphone").innerHTML = content;
+            }
+        });
+    }
+    function deleteSmartphone(element){
+        let IdSmartphone = element.getAttribute("href");
+        $.ajax({
+            type:"DELETE",
+            url:`/smartphones/${IdSmartphone}`,
+            // success:function (){
+            //     element.parentElement.parentElement.remove();
+            // }
+            success: showListSmartphone
+        })
+        event.preventDefault();
+    }
+</script>
+</body>
+</html>
